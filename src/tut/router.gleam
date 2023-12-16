@@ -1,5 +1,6 @@
 import wisp.{type Request, type Response}
 import tut/pages/home
+import tut/pages/daily
 
 pub fn handle_request(req: Request) -> Response {
   // Apply the middleware stack for this request/response.
@@ -8,6 +9,9 @@ pub fn handle_request(req: Request) -> Response {
   case wisp.path_segments(req) {
     // This matches `/`.
     [] -> home.page(req)
+
+    ["daily", "new"] -> daily.page_new(req)
+    ["daily"] -> daily.create(req)
 
     _ -> wisp.not_found()
   }
