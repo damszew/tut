@@ -15,6 +15,7 @@ wisp = "~> 0.8"
 lustre = "~> 3.1"
 mist = "~> 0.15"
 gleam_erlang = "~> 0.23"
+gleam_otp = "~> 0.8"
 
 [dev-dependencies]
 gleeunit = "~> 1.0"
