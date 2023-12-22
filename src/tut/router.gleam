@@ -17,6 +17,7 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
 
     ["daily", "new"] -> daily.page_new(req)
     ["daily"] -> daily.create(req, ctx.db)
+    ["daily", id] -> daily.join(req, id)
 
     _ -> wisp.not_found()
   }
