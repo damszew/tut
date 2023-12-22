@@ -1,8 +1,13 @@
 import wisp.{type Request, type Response}
 import tut/pages/home
 import tut/pages/daily
+import tut/daily/daily_router
 
-pub fn handle_request(req: Request) -> Response {
+pub type Context {
+  Context(db: daily_router.DailyRouter)
+}
+
+pub fn handle_request(req: Request, ctx: Context) -> Response {
   // Apply the middleware stack for this request/response.
   use _req <- middleware(req)
 
@@ -11,7 +16,7 @@ pub fn handle_request(req: Request) -> Response {
     [] -> home.page(req)
 
     ["daily", "new"] -> daily.page_new(req)
-    ["daily"] -> daily.create(req)
+    ["daily"] -> daily.create(req, ctx.db)
 
     _ -> wisp.not_found()
   }

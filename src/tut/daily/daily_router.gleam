@@ -3,6 +3,7 @@ import gleam/otp/actor
 import gleam/dict
 import gleam/result
 import tut/daily/daily
+import minigen
 
 pub opaque type DailyRouter {
   DailyRouter(inner: Subject(Message))
@@ -15,9 +16,11 @@ pub fn new() -> Result(DailyRouter, Nil) {
 }
 
 pub fn create(daily: DailyRouter) -> String {
-  // TODO: randomize
-  let daily_id = "token"
+  let daily_id =
+    minigen.string(8)
+    |> minigen.run
 
+  // TODO: Actor should create id and return it
   actor.send(daily.inner, Create(daily_id))
 
   daily_id
