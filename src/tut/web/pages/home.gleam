@@ -1,10 +1,9 @@
-import wisp.{type Request, type Response}
-import gleam/string_builder
+import gleam/string_builder.{type StringBuilder}
 import lustre/element/html
 import lustre/element
 import lustre/attribute
 
-pub fn page(_: Request) -> Response {
+pub fn page() -> StringBuilder {
   let doctype = string_builder.from_string("<!doctype html>")
 
   let content =
@@ -113,11 +112,7 @@ pub fn page(_: Request) -> Response {
     ])
     |> element.to_string_builder()
 
-  let body =
-    string_builder.new()
-    |> string_builder.append_builder(doctype)
-    |> string_builder.append_builder(content)
-
-  // Return a 200 OK response with the body and a HTML content type.
-  wisp.html_response(body, 200)
+  string_builder.new()
+  |> string_builder.append_builder(doctype)
+  |> string_builder.append_builder(content)
 }

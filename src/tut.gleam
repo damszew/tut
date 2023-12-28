@@ -112,20 +112,20 @@ import gleam/dynamic
 import gleam/json
 
 type Msg {
-  Msg(chat_message: String, headers: dynamic.Dynamic)
+  Msg(event: String, headers: dynamic.Dynamic)
 }
 
 pub fn from_json(json_string: String) -> String {
-  let cat_decoder =
+  let raw_decoder =
     dynamic.decode2(
       Msg,
-      dynamic.field("chat_message", of: dynamic.string),
+      dynamic.field("event", of: dynamic.string),
       dynamic.field("HEADERS", of: dynamic.dynamic),
     )
 
-  let assert Ok(result) = json.decode(from: json_string, using: cat_decoder)
+  let assert Ok(result) = json.decode(from: json_string, using: raw_decoder)
 
-  result.chat_message
+  result.event
 }
 
 pub fn to_event(msg: String) -> daily.Event {

@@ -1,6 +1,6 @@
 import wisp.{type Request, type Response}
-import tut/web/pages/home
-import tut/web/pages/daily
+import tut/web/controllers/home
+import tut/web/controllers/daily
 import tut/daily_router
 
 pub type Context {
