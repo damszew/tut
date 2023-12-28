@@ -3,7 +3,7 @@ import wisp.{type Request, type Response}
 import lustre/element/html
 import lustre/element
 import lustre/attribute
-import tut/daily/daily_router
+import tut/daily_router
 
 pub fn page_new(_: Request) -> Response {
   let doctype = string_builder.from_string("<!doctype html>")

@@ -1,7 +1,7 @@
 import wisp.{type Request, type Response}
-import tut/pages/home
-import tut/pages/daily
-import tut/daily/daily_router
+import tut/web/pages/home
+import tut/web/pages/daily
+import tut/daily_router
 
 pub type Context {
   Context(db: daily_router.DailyRouter)

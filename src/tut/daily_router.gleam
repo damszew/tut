@@ -2,7 +2,7 @@ import gleam/erlang/process.{type Subject}
 import gleam/otp/actor
 import gleam/dict
 import gleam/result
-import tut/daily/daily
+import tut/daily
 import minigen
 
 pub opaque type DailyRouter {

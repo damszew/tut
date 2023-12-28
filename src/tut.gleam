@@ -10,9 +10,9 @@ import gleam/otp/actor
 import gleam/bit_array
 import gleam/option
 import gleam/result
-import tut/router
-import tut/daily/daily_router
-import tut/daily/daily
+import tut/web/router
+import tut/daily_router
+import tut/daily
 
 pub fn main() {
   wisp.configure_logger()
