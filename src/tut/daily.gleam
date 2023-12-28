@@ -3,6 +3,15 @@ import gleam/otp/actor
 import gleam/list
 import gleam/result
 
+pub type Event {
+  NewPersonJoined
+  RaisedHand
+  PersonLeft
+}
+
+pub type Participant =
+  Subject(Event)
+
 pub opaque type Daily {
   Daily(inner: Subject(Message))
 }
@@ -13,21 +22,21 @@ pub fn new() -> Result(Daily, Nil) {
   |> result.nil_error()
 }
 
-pub fn send(daily: Daily, event: String) -> Nil {
+pub fn send(daily: Daily, event: Event) -> Nil {
   process.send(daily.inner, Send(event))
 }
 
-pub fn join(daily: Daily, participant: Subject(String)) -> Nil {
+pub fn join(daily: Daily, participant: Participant) -> Nil {
   process.send(daily.inner, Join(participant))
 }
 
 type Participants =
-  List(Subject(String))
+  List(Participant)
 
 type Message {
-  Join(participant: Subject(String))
+  Join(participant: Participant)
 
-  Send(event: String)
+  Send(event: Event)
 }
 
 fn handle_message(

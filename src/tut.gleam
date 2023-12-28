@@ -64,7 +64,7 @@ pub fn main() {
 }
 
 pub type WsMessage {
-  Event(String)
+  Event(daily.Event)
 }
 
 fn handle_ws_message(
@@ -80,6 +80,7 @@ fn handle_ws_message(
         |> bit_array.to_string
         |> result.unwrap("")
         |> from_json()
+        |> to_event()
 
       daily
       |> daily.send(msg)
@@ -88,7 +89,11 @@ fn handle_ws_message(
     }
 
     // Write
-    mist.Custom(Event(text)) -> {
+    mist.Custom(Event(event)) -> {
+      let text =
+        event
+        |> to_string()
+
       let assert Ok(_) = mist.send_text_frame(conn, <<text:utf8>>)
       actor.continue(daily)
     }
@@ -121,4 +126,21 @@ pub fn from_json(json_string: String) -> String {
   let assert Ok(result) = json.decode(from: json_string, using: cat_decoder)
 
   result.chat_message
+}
+
+pub fn to_event(msg: String) -> daily.Event {
+  case msg {
+    "NewPersonJoined" -> daily.NewPersonJoined
+    "RaisedHand" -> daily.RaisedHand
+    "PersonLeft" -> daily.PersonLeft
+    _ -> todo
+  }
+}
+
+pub fn to_string(msg: daily.Event) -> String {
+  case msg {
+    daily.NewPersonJoined -> "NewPersonJoined"
+    daily.RaisedHand -> "RaisedHand"
+    daily.PersonLeft -> "PersonLeft"
+  }
 }

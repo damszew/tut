@@ -29,7 +29,7 @@ pub fn create(daily: DailyRouter) -> String {
 pub fn join(
   daily: DailyRouter,
   daily_id: String,
-  participant: Subject(String),
+  participant: Subject(daily.Event),
 ) -> daily.Daily {
   let assert Ok(r) =
     actor.call(daily.inner, fn(x) { Join(daily_id, participant, x) }, 5000)
@@ -43,7 +43,7 @@ type Dailies =
 type Message {
   Join(
     daily_id: String,
-    participant: Subject(String),
+    participant: Subject(daily.Event),
     reply_with: Subject(Result(daily.Daily, Nil)),
   )
 
