@@ -1,5 +1,5 @@
 import wisp.{type Request, type Response}
-import tut/web/pages/home
+import tut/web/views/pages/home
 
 pub fn page(_: Request) -> Response {
   let body = home.page()

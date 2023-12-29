@@ -2,7 +2,7 @@ import gleam/string_builder.{type StringBuilder}
 import lustre/element/html
 import lustre/element
 import lustre/attribute
-import tut/web/pages/layouts/root
+import tut/web/views/layouts/root
 
 pub fn page() -> StringBuilder {
   root.layout([

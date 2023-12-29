@@ -1,7 +1,7 @@
 import wisp.{type Request, type Response}
 import tut/daily_router
-import tut/web/pages/new_daily
-import tut/web/pages/join_daily
+import tut/web/views/pages/new_daily
+import tut/web/views/pages/join_daily
 
 pub fn page_new(_: Request) -> Response {
   let body = new_daily.page()
