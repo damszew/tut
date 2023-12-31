@@ -36,9 +36,19 @@ pub fn create(
   wisp.redirect(to: "daily/" <> token)
 }
 
-pub fn join(_: wisp.Request, daily_id: String) -> wisp.Response {
-  let body = join_daily.page(daily_id)
-  wisp.html_response(body, 200)
+pub fn join(
+  _: wisp.Request,
+  daily_id: String,
+  daily_router: daily_router.DailyRouter,
+) -> wisp.Response {
+  case daily_router.daily_exists(daily_router, daily_id) {
+    True -> {
+      let body = join_daily.page(daily_id)
+      wisp.html_response(body, 200)
+    }
+    // TODO: Display some error about what happened
+    False -> wisp.redirect(to: "/")
+  }
 }
 
 pub fn daily_websocket(
@@ -46,8 +56,6 @@ pub fn daily_websocket(
   daily_id: String,
   daily_router: daily_router.DailyRouter,
 ) -> Response(ResponseData) {
-  wisp.log_info("Joining websocket")
-
   mist.websocket(
     request: req,
     on_init: init_websocket(_, daily_id, daily_router),

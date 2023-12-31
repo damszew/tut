@@ -26,6 +26,11 @@ pub fn create(daily: DailyRouter) -> String {
   daily_id
 }
 
+pub fn daily_exists(daily: DailyRouter, daily_id: String) -> Bool {
+  actor.call(daily.inner, CheckExists(daily_id, _), 500)
+  |> result.unwrap(False)
+}
+
 pub fn join(
   daily: DailyRouter,
   daily_id: String,
@@ -48,6 +53,8 @@ type Message {
   )
 
   Create(daily_id: String)
+
+  CheckExists(daily_id: String, reply_with: Subject(Result(Bool, Nil)))
 }
 
 fn handle_message(
@@ -86,6 +93,15 @@ fn handle_message(
         }
       }
 
+      actor.continue(dailies)
+    }
+
+    CheckExists(daily_id, client) -> {
+      let has_daily =
+        dailies
+        |> dict.has_key(daily_id)
+
+      process.send(client, Ok(has_daily))
       actor.continue(dailies)
     }
   }
