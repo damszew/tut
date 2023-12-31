@@ -32,10 +32,10 @@ pub fn page(daily_id: String) -> StringBuilder {
           html.div(
             [
               attribute.attribute("hx-ext", "ws"),
-              attribute.attribute("ws-connect", "/ws/" <> daily_id),
+              attribute.attribute("ws-connect", "/daily/" <> daily_id <> "/ws/"),
               attribute.class("container mx-auto flex flex-col"),
             ],
-            [],
+            [html.div([attribute.id("event-container")], [])],
           ),
         ]),
       ],

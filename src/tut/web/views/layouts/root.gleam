@@ -18,6 +18,11 @@ pub fn layout(inner: List(Element(a))) -> Element(a) {
         attribute.type_("text/css"),
       ]),
       html.script([attribute.src("https://cdn.tailwindcss.com")], ""),
+      html.script([attribute.src("https://unpkg.com/htmx.org@1.9.9")], ""),
+      html.script(
+        [attribute.src("https://unpkg.com/htmx.org/dist/ext/ws.js")],
+        "",
+      ),
     ]),
     html.body(
       [

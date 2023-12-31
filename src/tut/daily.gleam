@@ -52,6 +52,11 @@ fn handle_message(
     }
 
     Join(new_participant) -> {
+      participants
+      |> list.each(fn(participant) {
+        process.send(participant, NewPersonJoined)
+      })
+
       let new_participants = [new_participant, ..participants]
 
       actor.continue(new_participants)
