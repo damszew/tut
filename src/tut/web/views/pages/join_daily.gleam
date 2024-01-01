@@ -3,6 +3,7 @@ import lustre/element/html
 import lustre/element
 import lustre/attribute
 import tut/web/views/layouts/root
+import tut/web/views/components/toast
 
 pub fn page(daily_id: String) -> StringBuilder {
   root.layout([
@@ -35,7 +36,7 @@ pub fn page(daily_id: String) -> StringBuilder {
               attribute.attribute("ws-connect", "/daily/" <> daily_id <> "/ws/"),
               attribute.class("container mx-auto flex flex-col"),
             ],
-            [html.div([attribute.id("event-container")], [])],
+            [toast.toasts_container()],
           ),
         ]),
       ],

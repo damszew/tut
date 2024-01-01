@@ -23,6 +23,10 @@ pub fn layout(inner: List(Element(a))) -> Element(a) {
         [attribute.src("https://unpkg.com/htmx.org/dist/ext/ws.js")],
         "",
       ),
+      html.script(
+        [attribute.src("https://unpkg.com/hyperscript.org@0.9.12")],
+        "",
+      ),
     ]),
     html.body(
       [
