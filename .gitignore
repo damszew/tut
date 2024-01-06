@@ -4,3 +4,6 @@ build
 erl_crash.dump
 
 .direnv
+
+/target
+/result
