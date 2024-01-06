@@ -7,7 +7,7 @@ edition = "2021"
 anyhow = "1.0.79"
 axum = { version = "0.7.3", features = ["macros"] }
 clap = { version = "4.4.13", features = ["derive", "env"] }
-maud = { version = "0.25.0", features = ["axum"] }
+maud = { git = "https://github.com/lambda-fairy/maud.git", features = ["axum"] } # TODO: Waiting for newer version with axum integration to be published
 serde = { version = "1.0.195", features = ["derive"] }
 thiserror = "1.0.56"
 tokio = { version = "1.35.1", features = ["full"] }
