@@ -1,5 +1,6 @@
 use tokio::net::TcpListener;
 
+mod daily;
 mod web;
 
 pub struct Config {

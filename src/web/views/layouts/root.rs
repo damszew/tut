@@ -15,7 +15,7 @@ pub fn layout(inner: Markup) -> Markup {
                 link
                     href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css"
                     rel="stylesheet"
-                    type_="text/css" {}
+                    type="text/css" {}
                 script src="https://cdn.tailwindcss.com" {}
 
             }
