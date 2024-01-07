@@ -1322,6 +1322,7 @@ dependencies = [
  "futures",
  "maud",
  "serde",
+ "serde_json",
  "thiserror",
  "tokio",
  "tower",
