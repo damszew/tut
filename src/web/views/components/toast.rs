@@ -2,6 +2,7 @@ use std::fmt::Display;
 
 use maud::Markup;
 
+#[allow(dead_code)] //Silence compiler about unused levels
 pub enum ToastLevel {
     None,
     Info,

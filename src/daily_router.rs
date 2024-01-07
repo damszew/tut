@@ -3,7 +3,7 @@ use std::{collections::HashMap, sync::Arc};
 use rand::{distributions::Alphanumeric, Rng};
 use tokio::sync::RwLock;
 
-use crate::daily::{Daily, Event, Participant};
+use crate::daily::{Daily, Participant};
 
 #[derive(Debug, Clone)]
 pub struct DailyRouter {
@@ -36,7 +36,7 @@ impl DailyRouter {
         self.dailies.read().await.contains_key(daily_id)
     }
 
-    pub async fn join(&self, daily_id: &str, participant: Participant) -> Daily {
+    pub async fn join(&self, daily_id: &str, _participant: Participant) -> Daily {
         self.dailies
             .read()
             .await

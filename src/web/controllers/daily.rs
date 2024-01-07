@@ -61,7 +61,7 @@ struct WsMsg {
     event: crate::daily::Event,
 
     #[serde(rename = "HEADERS")]
-    headers: HashMap<String, String>,
+    _headers: HashMap<String, String>,
 }
 
 async fn handle_socket(socket: WebSocket, daily: Daily) {
