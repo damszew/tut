@@ -1321,6 +1321,7 @@ dependencies = [
  "clap",
  "futures",
  "maud",
+ "rand",
  "serde",
  "serde_json",
  "thiserror",

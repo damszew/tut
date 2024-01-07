@@ -29,13 +29,14 @@ pub async fn create(
     State(app_state): State<AppState>,
     Form(_): Form<HashMap<String, String>>,
 ) -> Redirect {
-    let token = app_state.daily_router.create_daily();
+    // TODO: Here should happen conversion from id to url-friendly id token
+    let token = app_state.daily_router.create_daily().await;
 
     Redirect::to(&format!("daily/{token}"))
 }
 
 pub async fn room(Path(daily_id): Path<String>, State(app_state): State<AppState>) -> Response {
-    let exists = app_state.daily_router.daily_exists(&daily_id);
+    let exists = app_state.daily_router.daily_exists(&daily_id).await;
 
     match exists {
         true => daily::page(daily_id).into_response(),
@@ -50,7 +51,7 @@ pub async fn websocket(
     Path(daily_id): Path<String>,
     State(app_state): State<AppState>,
 ) -> Response {
-    let daily = app_state.daily_router.join(daily_id, ());
+    let daily = app_state.daily_router.join(&daily_id, ()).await;
 
     ws.on_upgrade(move |socket| handle_socket(socket, daily))
 }
