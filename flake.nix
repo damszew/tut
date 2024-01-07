@@ -42,9 +42,40 @@
         buildInputs = with pkgs; [
         ];
 
+        craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
+        src = craneLib.cleanCargoSource ./.;
+
+        commonArgs = {
+          inherit src buildInputs nativeBuildInputs;
+        };
+
+        # Build *just* the cargo dependencies, so we can reuse
+        # all of that work (e.g. via cachix) when running in CI
+        cargoArtifacts = craneLib.buildDepsOnly commonArgs;
+
+        fmt = craneLib.cargoFmt {
+          inherit src;
+        };
+
+        clippy = craneLib.cargoClippy (commonArgs // {
+          inherit cargoArtifacts;
+          cargoClippyExtraArgs = "--all-targets -- --deny warnings";
+        });
+
+        # Build the actual crate itself, reusing the dependency
+        # artifacts from above.
+        bin = craneLib.buildPackage (commonArgs // {
+          inherit cargoArtifacts;
+        });
+
       in
       with pkgs;
       {
+        # `nix flake check`
+        checks = {
+          inherit fmt clippy bin;
+        };
+
         # `nix develop`
         devShells.default = mkShell {
           inherit buildInputs nativeBuildInputs;

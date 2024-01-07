@@ -10,9 +10,6 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: nix develop --command bash {0}
     steps:
       - name: Checkout 📂
         uses: actions/checkout@v3
@@ -23,17 +20,5 @@ jobs:
       - name: Setup nix cache 📝
         uses: DeterminateSystems/magic-nix-cache-action@main
 
-      - name: Fmt 🔍
-        run: cargo fmt --all -- --check
-
-      - name: Setup rust cache 📝
-        uses: Swatinem/rust-cache@v2
-
-      - name: Check 🚧
-        run: cargo check --all-targets --all-features
-
-      - name: Clippy 🕵️
-        run: cargo clippy -- -D warnings
-
-      - name: Tests 🧪
-        run: cargo test
+      - name: Flake check ❄️
+        run: nix flake check --print-build-logs
