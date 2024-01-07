@@ -35,9 +35,6 @@
         # Only compile time deps
         nativeBuildInputs = with pkgs; [
           rustToolchain
-          erlang
-          gleam
-          rebar3
           commitizen
         ];
 
