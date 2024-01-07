@@ -3,7 +3,7 @@ use std::{collections::HashMap, sync::Arc};
 use rand::{distributions::Alphanumeric, Rng};
 use tokio::sync::RwLock;
 
-use crate::daily::{Daily, Participant};
+use crate::daily::{Daily, Event, Participant};
 
 #[derive(Debug, Clone)]
 pub struct DailyRouter {

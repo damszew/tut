@@ -28,7 +28,7 @@ pub fn toast(level: ToastLevel, msg: impl Display) -> Markup {
     maud::html! {
         // TODO: Use morphing for appending?
         div #toasts .toast hx-swap-oob="beforeend" {
-            div .(level) _="init wait 5s then transition opacity to 0 then remove me" {
+            div .{"alert " (level)} _="init wait 5s then transition opacity to 0 then remove me" {
                 span { (msg) }
             }
         }

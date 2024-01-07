@@ -68,8 +68,9 @@ async fn handle_socket(socket: WebSocket, daily: Daily) {
     tracing::info!("Opened ws");
     let (mut sender, mut receiver) = socket.split();
 
+    let mut daily_events = daily.subscribe().await;
+
     let mut recv_task = tokio::spawn({
-        let daily = daily.clone();
         async move {
             while let Some(Ok(msg)) = receiver.next().await {
                 match msg {
@@ -87,7 +88,7 @@ async fn handle_socket(socket: WebSocket, daily: Daily) {
     });
 
     let mut send_task = tokio::spawn(async move {
-        while let Ok(event) = daily.recv().await {
+        while let Ok(event) = daily_events.recv().await {
             let text = daily_event::to_html(event).into_string();
 
             sender
