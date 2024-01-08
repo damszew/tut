@@ -1,13 +1,12 @@
 use std::{collections::HashMap, sync::Arc};
 
-use rand::{distributions::Alphanumeric, Rng};
 use tokio::sync::RwLock;
 
-use crate::daily::{Daily, Participant};
+use crate::daily::{Daily, DailyId};
 
 #[derive(Debug, Clone)]
 pub struct DailyRouter {
-    dailies: Arc<RwLock<HashMap<String, Daily>>>,
+    dailies: Arc<RwLock<HashMap<DailyId, Daily>>>,
 }
 
 impl DailyRouter {
@@ -17,26 +16,20 @@ impl DailyRouter {
         }
     }
 
-    pub async fn create_daily(&self) -> String {
+    pub async fn create_daily(&self) -> DailyId {
         let daily = Daily::new();
 
-        // TODO: probably daily should create it
-        let daily_id = rand::thread_rng()
-            .sample_iter(&Alphanumeric)
-            .take(8)
-            .map(char::from)
-            .collect::<String>();
-
+        let daily_id = DailyId::random();
         self.dailies.write().await.insert(daily_id.clone(), daily);
 
         daily_id
     }
 
-    pub async fn daily_exists(&self, daily_id: &str) -> bool {
+    pub async fn daily_exists(&self, daily_id: &DailyId) -> bool {
         self.dailies.read().await.contains_key(daily_id)
     }
 
-    pub async fn join(&self, daily_id: &str, _participant: Participant) -> Daily {
+    pub async fn get(&self, daily_id: &DailyId) -> Daily {
         self.dailies
             .read()
             .await

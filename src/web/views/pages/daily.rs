@@ -1,8 +1,11 @@
 use maud::Markup;
 
-use crate::web::views::{components::toast::toasts_container, layouts::root};
+use crate::{
+    daily::DailyId,
+    web::views::{components::toast::toasts_container, layouts::root},
+};
 
-pub fn page(daily_id: String) -> Markup {
+pub fn page(daily_id: DailyId) -> Markup {
     let body = maud::html! {
         header {
             nav ."navbar bg-base-100 shadow-xl px-4" {

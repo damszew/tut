@@ -11,7 +11,7 @@ use axum::{
 use futures::{sink::SinkExt, stream::StreamExt};
 
 use crate::{
-    daily::Daily,
+    daily::{Daily, DailyId},
     web::{
         router::AppState,
         views::{
@@ -35,7 +35,7 @@ pub async fn create(
     Redirect::to(&format!("daily/{token}"))
 }
 
-pub async fn room(Path(daily_id): Path<String>, State(app_state): State<AppState>) -> Response {
+pub async fn room(Path(daily_id): Path<DailyId>, State(app_state): State<AppState>) -> Response {
     let exists = app_state.daily_router.daily_exists(&daily_id).await;
 
     match exists {
@@ -48,10 +48,10 @@ pub async fn room(Path(daily_id): Path<String>, State(app_state): State<AppState
 
 pub async fn websocket(
     ws: WebSocketUpgrade,
-    Path(daily_id): Path<String>,
+    Path(daily_id): Path<DailyId>,
     State(app_state): State<AppState>,
 ) -> Response {
-    let daily = app_state.daily_router.join(&daily_id, ()).await;
+    let daily = app_state.daily_router.get(&daily_id).await;
 
     ws.on_upgrade(move |socket| handle_socket(socket, daily))
 }
@@ -68,7 +68,7 @@ async fn handle_socket(socket: WebSocket, daily: Daily) {
     tracing::info!("Opened ws");
     let (mut sender, mut receiver) = socket.split();
 
-    let mut daily_events = daily.subscribe().await;
+    let mut daily_events = daily.join(()).await;
 
     let mut recv_task = tokio::spawn({
         async move {
