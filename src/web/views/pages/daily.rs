@@ -1,11 +1,14 @@
 use maud::Markup;
 
 use crate::{
-    daily::DailyId,
-    web::views::{components::toast::toasts_container, layouts::root},
+    daily::{DailyId, DailyState},
+    web::views::{
+        components::{daily_state, toast},
+        layouts::root,
+    },
 };
 
-pub fn page(daily_id: DailyId) -> Markup {
+pub fn page(daily_id: DailyId, initial_state: &DailyState) -> Markup {
     let body = maud::html! {
         header {
             nav ."navbar bg-base-100 shadow-xl px-4" {
@@ -18,7 +21,8 @@ pub fn page(daily_id: DailyId) -> Markup {
             section ."p-8" {
                 p { (daily_id) }
                 div ."container mx-auto flex flex-col" hx-ext="ws" ws-connect={"/daily/" (daily_id) "/ws"} {
-                     (toasts_container())
+                    (daily_state::html(initial_state))
+                    (toast::container())
                 }
             }
         }

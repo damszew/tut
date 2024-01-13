@@ -11,7 +11,7 @@ use axum::{
 use futures::{sink::SinkExt, stream::StreamExt};
 
 use crate::{
-    daily::{Daily, DailyId},
+    daily::{Daily, DailyId, Participant},
     web::{
         router::AppState,
         views::{
@@ -36,13 +36,13 @@ pub async fn create(
 }
 
 pub async fn room(Path(daily_id): Path<DailyId>, State(app_state): State<AppState>) -> Response {
-    let exists = app_state.daily_router.daily_exists(&daily_id).await;
+    let daily = app_state.daily_router.get(&daily_id).await;
 
-    match exists {
-        true => daily::page(daily_id).into_response(),
+    match daily {
+        Some(daily) => daily::page(daily_id, &daily.state().await).into_response(),
 
         // TODO: Display error about what happened
-        false => Redirect::to("/").into_response(),
+        None => Redirect::to("/").into_response(),
     }
 }
 
@@ -51,7 +51,11 @@ pub async fn websocket(
     Path(daily_id): Path<DailyId>,
     State(app_state): State<AppState>,
 ) -> Response {
-    let daily = app_state.daily_router.get(&daily_id).await;
+    let daily = app_state
+        .daily_router
+        .get(&daily_id)
+        .await
+        .expect(&format!("Connecting to nonexisting daily {daily_id}"));
 
     ws.on_upgrade(move |socket| handle_socket(socket, daily))
 }
@@ -68,13 +72,16 @@ async fn handle_socket(socket: WebSocket, daily: Daily) {
     tracing::info!("Opened ws");
     let (mut sender, mut receiver) = socket.split();
 
-    let mut daily_events = daily.join(()).await;
+    let me = Participant::default();
+    let mut daily_events = daily.join(me.clone()).await;
 
     let mut recv_task = tokio::spawn({
         async move {
             while let Some(Ok(msg)) = receiver.next().await {
                 match msg {
-                    Message::Close(_) => break,
+                    Message::Close(_) => {
+                        daily.leave(me.clone()).await;
+                    }
 
                     Message::Text(text) => {
                         let msg = serde_json::from_str::<WsMsg>(&text)

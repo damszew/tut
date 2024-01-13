@@ -25,16 +25,7 @@ impl DailyRouter {
         daily_id
     }
 
-    pub async fn daily_exists(&self, daily_id: &DailyId) -> bool {
-        self.dailies.read().await.contains_key(daily_id)
-    }
-
-    pub async fn get(&self, daily_id: &DailyId) -> Daily {
-        self.dailies
-            .read()
-            .await
-            .get(daily_id)
-            .expect("Handle missing daily")
-            .clone()
+    pub async fn get(&self, daily_id: &DailyId) -> Option<Daily> {
+        self.dailies.read().await.get(daily_id).cloned()
     }
 }

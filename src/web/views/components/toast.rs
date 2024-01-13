@@ -11,7 +11,7 @@ pub enum ToastLevel {
     Error,
 }
 
-pub fn toasts_container() -> Markup {
+pub fn container() -> Markup {
     maud::html! {
         // TODO: Use morphing for appending?
         div #toasts .toast hx-swap-oob="beforeend" {}
