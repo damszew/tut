@@ -16,7 +16,7 @@ pub fn router(app_state: AppState) -> Router {
         .route("/daily/new", routing::get(daily::create_form))
         .route("/daily", routing::post(daily::create))
         .route("/daily/:id", routing::get(daily::room))
-        .route("/daily/:id/ws", routing::get(daily::websocket))
+        .route("/daily/:id/join", routing::post(daily::join))
         .layer(ServiceBuilder::new().layer(tower_http::trace::TraceLayer::new_for_http()))
         .with_state(app_state)
 }

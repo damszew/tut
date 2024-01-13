@@ -1,7 +1,7 @@
 use std::{collections::HashSet, fmt::Display, sync::Arc};
 
 use rand::{distributions::Alphanumeric, Rng};
-use tokio::sync::{broadcast, RwLock};
+use tokio::sync::RwLock;
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub enum Event {
@@ -56,11 +56,8 @@ impl Default for Participant {
     }
 }
 
-const CAPACITY: usize = 200;
-
 #[derive(Debug, Clone)]
 pub struct Daily {
-    sender: broadcast::Sender<Event>,
     state: Arc<RwLock<DailyState>>,
 }
 #[derive(Debug, Clone, Default)]
@@ -71,40 +68,30 @@ pub struct DailyState {
 
 impl Daily {
     pub fn new() -> Self {
-        let (sender, _receiver) = broadcast::channel(CAPACITY);
-
         Self {
-            sender,
             state: Default::default(),
         }
     }
 
     #[tracing::instrument(skip_all, fields(participant=participant.name))]
-    pub async fn join(&self, participant: Participant) -> (broadcast::Receiver<Event>, DailyState) {
+    pub async fn join(&self, participant: Participant) {
         tracing::info!("Joining daily");
 
-        // lock fist to make sure nothing changes in mean time
-        let mut state_lock = self.state.write().await;
-        state_lock.participants.insert(participant.clone());
-        let initial_state = state_lock.clone();
-
-        // Send before joining, so I don't receive event about myself
-        // Also ignore Err when there are no other receivers
-        let _ = self.sender.send(Event::NewPersonJoined(participant));
-
-        let receiver = self.sender.subscribe();
-
-        (receiver, initial_state)
+        self.state
+            .write()
+            .await
+            .participants
+            .insert(participant.clone());
     }
 
     #[tracing::instrument(skip_all, fields(participant=participant.name))]
     pub async fn leave(&self, participant: Participant) {
         tracing::info!("Leaving daily");
 
-        let mut state_lock = self.state.write().await;
-        state_lock.participants.remove(&participant);
+        self.state.write().await.participants.remove(&participant);
+    }
 
-        // Also ignore Err when there are no other receivers
-        let _ = self.sender.send(Event::PersonLeft(participant));
+    pub async fn state(&self) -> DailyState {
+        self.state.read().await.clone()
     }
 }
