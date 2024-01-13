@@ -9,6 +9,7 @@ use axum::{
     Form,
 };
 use futures::{sink::SinkExt, stream::StreamExt};
+use tracing::Instrument;
 
 use crate::{
     daily::{Daily, DailyId, Participant},
@@ -57,7 +58,10 @@ pub async fn websocket(
         .await
         .expect(&format!("Connecting to nonexisting daily {daily_id}"));
 
-    ws.on_upgrade(move |socket| handle_socket(socket, daily))
+    ws.on_upgrade(move |socket| {
+        let span = tracing::info_span!("websocket", daily_id = daily_id.to_string());
+        handle_socket(socket, daily).instrument(span)
+    })
 }
 
 #[derive(Debug, serde::Deserialize)]

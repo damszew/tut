@@ -79,7 +79,6 @@ impl Daily {
         }
     }
 
-    // TODO: Add dailyId to trace
     #[tracing::instrument(skip_all, fields(participant=participant.name))]
     pub async fn join(&self, participant: Participant) -> (broadcast::Receiver<Event>, DailyState) {
         tracing::info!("Joining daily");
