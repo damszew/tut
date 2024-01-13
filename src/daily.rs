@@ -79,12 +79,6 @@ impl Daily {
         }
     }
 
-    // TODO: Maybe split like websocket?
-    // TODO: This should accept actions not events
-    pub async fn send(&self, event: Event) {
-        self.sender.send(event).expect("Handle channel send error");
-    }
-
     pub async fn join(&self, participant: Participant) -> broadcast::Receiver<Event> {
         // Send before joining, so I don't receive event about myself
         // Also ignore Err when there are no other receivers

@@ -62,10 +62,15 @@ pub async fn websocket(
 
 #[derive(Debug, serde::Deserialize)]
 struct WsMsg {
-    event: crate::daily::Event,
+    action: Action,
 
     #[serde(rename = "HEADERS")]
     _headers: HashMap<String, String>,
+}
+
+#[derive(Debug, serde::Deserialize)]
+enum Action {
+    RiseHand,
 }
 
 async fn handle_socket(socket: WebSocket, daily: Daily) {
@@ -86,7 +91,9 @@ async fn handle_socket(socket: WebSocket, daily: Daily) {
                     Message::Text(text) => {
                         let msg = serde_json::from_str::<WsMsg>(&text)
                             .expect("Handle serialization error in websocket");
-                        daily.send(msg.event).await;
+                        match msg.action {
+                            Action::RiseHand => todo!(),
+                        }
                     }
                     _ => (),
                 }
