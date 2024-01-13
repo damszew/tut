@@ -15,7 +15,7 @@ use crate::{
     web::{
         router::AppState,
         views::{
-            components::daily_event,
+            components::{daily_event, daily_state},
             pages::{daily, new_daily},
         },
     },
@@ -39,7 +39,7 @@ pub async fn room(Path(daily_id): Path<DailyId>, State(app_state): State<AppStat
     let daily = app_state.daily_router.get(&daily_id).await;
 
     match daily {
-        Some(daily) => daily::page(daily_id, &daily.state().await).into_response(),
+        Some(_) => daily::page(daily_id).into_response(),
 
         // TODO: Display error about what happened
         None => Redirect::to("/").into_response(),
@@ -78,14 +78,20 @@ async fn handle_socket(socket: WebSocket, daily: Daily) {
     let (mut sender, mut receiver) = socket.split();
 
     let me = Participant::default();
-    let mut daily_events = daily.join(me.clone()).await;
+    let (mut daily_events, initial_state) = daily.join(me.clone()).await;
+    sender
+        .send(Message::Text(
+            daily_state::html(&initial_state).into_string(),
+        ))
+        .await
+        .expect("Failed to send initial state");
 
     let mut recv_task = tokio::spawn({
         async move {
             while let Some(Ok(msg)) = receiver.next().await {
                 match msg {
                     Message::Close(_) => {
-                        daily.leave(me.clone()).await;
+                        break;
                     }
 
                     Message::Text(text) => {
@@ -120,4 +126,6 @@ async fn handle_socket(socket: WebSocket, daily: Daily) {
             send_task.abort();
         }
     }
+
+    daily.leave(me.clone()).await;
 }

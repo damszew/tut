@@ -79,27 +79,33 @@ impl Daily {
         }
     }
 
-    pub async fn join(&self, participant: Participant) -> broadcast::Receiver<Event> {
+    // TODO: Add dailyId to trace
+    #[tracing::instrument(skip_all, fields(participant=participant.name))]
+    pub async fn join(&self, participant: Participant) -> (broadcast::Receiver<Event>, DailyState) {
+        tracing::info!("Joining daily");
+
+        // lock fist to make sure nothing changes in mean time
+        let mut state_lock = self.state.write().await;
+        state_lock.participants.insert(participant.clone());
+        let initial_state = state_lock.clone();
+
         // Send before joining, so I don't receive event about myself
         // Also ignore Err when there are no other receivers
-        let _ = self
-            .sender
-            .send(Event::NewPersonJoined(participant.clone()));
+        let _ = self.sender.send(Event::NewPersonJoined(participant));
 
-        self.state.write().await.participants.insert(participant);
+        let receiver = self.sender.subscribe();
 
-        self.sender.subscribe()
+        (receiver, initial_state)
     }
 
+    #[tracing::instrument(skip_all, fields(participant=participant.name))]
     pub async fn leave(&self, participant: Participant) {
+        tracing::info!("Leaving daily");
+
+        let mut state_lock = self.state.write().await;
+        state_lock.participants.remove(&participant);
+
         // Also ignore Err when there are no other receivers
-        self.state.write().await.participants.remove(&participant);
-
         let _ = self.sender.send(Event::PersonLeft(participant));
-    }
-
-    // TODO: Consider splitting into more focused methods
-    pub async fn state(&self) -> DailyState {
-        self.state.read().await.clone()
     }
 }

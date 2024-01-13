@@ -4,10 +4,12 @@ use crate::daily::DailyState;
 
 pub fn html(state: &DailyState) -> Markup {
     maud::html! {
-        h2 { "Participants" }
-        div #participants {
-            @for participant in &state.participants {
-                p #(participant.name()) { (participant.name()) }
+        div #daily-state hx-swap-oob="beforeend" {
+            h2 { "Participants" }
+            div #participants {
+                @for participant in &state.participants {
+                    p #(participant.name()) { (participant.name()) }
+                }
             }
         }
     }
