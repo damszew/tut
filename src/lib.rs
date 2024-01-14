@@ -4,6 +4,7 @@ use web::router::AppState;
 
 mod daily;
 mod daily_router;
+mod participant;
 
 mod web;
 

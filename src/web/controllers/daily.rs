@@ -8,7 +8,8 @@ use axum::{
 use axum_extra::extract::{cookie::Cookie, CookieJar};
 
 use crate::{
-    daily::{DailyId, Participant},
+    daily::DailyId,
+    participant::Participant,
     web::{
         router::AppState,
         views::pages::{daily, join_daily, new_daily},

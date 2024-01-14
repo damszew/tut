@@ -1,7 +1,8 @@
-use std::{collections::HashSet, fmt::Display, sync::Arc};
+use std::{collections::HashSet, sync::Arc};
 
-use rand::{distributions::Alphanumeric, Rng};
 use tokio::sync::RwLock;
+
+use crate::participant::Participant;
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub enum Event {
@@ -10,49 +11,16 @@ pub enum Event {
     PersonLeft(Participant),
 }
 
-#[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord, serde::Deserialize)]
-pub struct DailyId(String);
-
-impl Display for DailyId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
-    }
-}
+#[derive(
+    Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord, serde::Deserialize, derive_more::Display,
+)]
+pub struct DailyId(uuid::Uuid);
 
 impl DailyId {
     pub fn random() -> Self {
         // TODO: probably daily should create it
-        let daily_id = rand::thread_rng()
-            .sample_iter(&Alphanumeric)
-            .take(8)
-            .map(char::from)
-            .collect::<String>();
 
-        Self(daily_id)
-    }
-}
-
-#[derive(Debug, Clone, serde::Deserialize, PartialEq, Eq, Hash)]
-pub struct Participant {
-    name: String,
-}
-
-impl Participant {
-    pub fn name(&self) -> &str {
-        self.name.as_ref()
-    }
-}
-
-impl Default for Participant {
-    // TODO: Just for now
-    fn default() -> Self {
-        Self {
-            name: rand::thread_rng()
-                .sample_iter(&Alphanumeric)
-                .take(8)
-                .map(char::from)
-                .collect::<String>(),
-        }
+        Self(uuid::Uuid::new_v4())
     }
 }
 
@@ -73,7 +41,7 @@ impl Daily {
         }
     }
 
-    #[tracing::instrument(skip_all, fields(participant=participant.name))]
+    #[tracing::instrument(skip_all, fields(participant=participant.name()))]
     pub async fn join(&self, participant: Participant) {
         tracing::info!("Joining daily");
 
@@ -84,7 +52,7 @@ impl Daily {
             .insert(participant.clone());
     }
 
-    #[tracing::instrument(skip_all, fields(participant=participant.name))]
+    #[tracing::instrument(skip_all, fields(participant=participant.name()))]
     pub async fn leave(&self, participant: Participant) {
         tracing::info!("Leaving daily");
 
