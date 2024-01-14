@@ -1,6 +1,6 @@
 use maud::Markup;
 
-use crate::web::views::layouts::root;
+use crate::views::layouts::root;
 
 pub fn page() -> Markup {
     let body = maud::html! {

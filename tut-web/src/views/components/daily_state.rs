@@ -1,6 +1,5 @@
 use maud::Markup;
-
-use crate::daily::{DailyId, DailyState};
+use tut::daily::{DailyId, DailyState};
 
 pub fn html(daily_id: DailyId, state: &DailyState) -> Markup {
     maud::html! {

@@ -46,16 +46,16 @@
         src = craneLib.cleanCargoSource ./.;
 
         commonArgs = {
+          pname = "tut-workspace";
+
           inherit src buildInputs nativeBuildInputs;
         };
 
-        # Build *just* the cargo dependencies, so we can reuse
-        # all of that work (e.g. via cachix) when running in CI
-        cargoArtifacts = craneLib.buildDepsOnly commonArgs;
+        cargoArtifacts = craneLib.buildDepsOnly (commonArgs // {
+          pname = "tut-web";
+        });
 
-        fmt = craneLib.cargoFmt {
-          inherit src;
-        };
+        fmt = craneLib.cargoFmt commonArgs;
 
         clippy = craneLib.cargoClippy (commonArgs // {
           inherit cargoArtifacts;

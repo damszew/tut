@@ -1,9 +1,7 @@
 use maud::Markup;
+use tut::daily::{DailyId, DailyState};
 
-use crate::{
-    daily::{DailyId, DailyState},
-    web::views::{components::daily_state, layouts::root},
-};
+use crate::views::{components::daily_state, layouts::root};
 
 pub fn page(daily_id: DailyId, state: &DailyState) -> Markup {
     let body = maud::html! {

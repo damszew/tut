@@ -24,7 +24,7 @@ impl DailyId {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Daily {
     state: Arc<RwLock<DailyState>>,
 }

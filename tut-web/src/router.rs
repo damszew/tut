@@ -1,7 +1,6 @@
 use axum::{routing, Router};
 use tower::ServiceBuilder;
-
-use crate::daily_router::DailyRouter;
+use tut::daily_router::DailyRouter;
 
 use super::controllers::{daily, home};
 

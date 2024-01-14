@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use tut::{daily::DailyId, participant::Participant};
 
 use axum::{
     extract::{Path, State},
@@ -8,12 +9,8 @@ use axum::{
 use axum_extra::extract::{cookie::Cookie, CookieJar};
 
 use crate::{
-    daily::DailyId,
-    participant::Participant,
-    web::{
-        router::AppState,
-        views::pages::{daily, join_daily, new_daily},
-    },
+    router::AppState,
+    views::pages::{daily, join_daily, new_daily},
 };
 
 pub async fn create_form() -> maud::Markup {

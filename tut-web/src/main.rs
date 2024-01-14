@@ -1,6 +1,13 @@
 use clap::Parser;
 use tokio::net::TcpListener;
 use tracing_subscriber::{prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt};
+use tut::daily_router::DailyRouter;
+
+use crate::router::AppState;
+
+mod controllers;
+mod router;
+mod views;
 
 #[derive(Parser, Debug)]
 struct Options {
@@ -24,7 +31,15 @@ async fn main() -> Result<(), anyhow::Error> {
     let tcp = TcpListener::bind(addr).await?;
 
     tracing::info!(%addr, "Starting server");
-    tut::run(tut::Config { tcp }).await
+    let app_state = AppState {
+        daily_router: DailyRouter::new(),
+    };
+
+    let routes = router::router(app_state);
+
+    axum::serve(tcp, routes).await?;
+
+    Ok(())
 }
 
 fn init_tracing(log_level: &str) {

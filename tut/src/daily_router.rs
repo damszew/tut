@@ -4,7 +4,7 @@ use tokio::sync::RwLock;
 
 use crate::daily::{Daily, DailyId};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct DailyRouter {
     dailies: Arc<RwLock<HashMap<DailyId, Daily>>>,
 }
