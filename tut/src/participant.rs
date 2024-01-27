@@ -1,19 +1,11 @@
-#[derive(Debug, Clone, serde::Deserialize, PartialEq, Eq, Hash)]
-pub struct Participant {
-    name: uuid::Uuid,
-}
+#[derive(
+    Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord, serde::Deserialize, derive_more::Display,
+)]
+pub struct ParticipantId(uuid::Uuid);
+impl ParticipantId {
+    pub fn random() -> Self {
+        // TODO: probably daily should create it
 
-impl Participant {
-    pub fn name(&self) -> String {
-        self.name.to_string()
-    }
-}
-
-impl Default for Participant {
-    // TODO: Just for now
-    fn default() -> Self {
-        Self {
-            name: uuid::Uuid::new_v4(),
-        }
+        Self(uuid::Uuid::new_v4())
     }
 }

@@ -8,7 +8,7 @@ pub fn html(daily_id: DailyId, state: &DailyState) -> Markup {
             h2 { "Participants" }
             div #participants {
                 @for participant in &state.participants {
-                    p #(participant.name()) { (participant.name()) }
+                    p #(participant.0) { (participant.0) }
                 }
             }
         }

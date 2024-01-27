@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use tut::{daily::DailyId, participant::Participant};
+use tut::{daily::DailyId, participant::ParticipantId};
 
 use axum::{
     extract::{Path, State},
@@ -35,8 +35,8 @@ pub async fn join(
 ) -> (CookieJar, Redirect) {
     let daily = app_state.daily_router.get(&daily_id).await.unwrap();
 
-    let me = Participant::default();
-    let jar = jar.add(Cookie::new(daily_id.to_string(), me.name().to_owned()));
+    let me = ParticipantId::random();
+    let jar = jar.add(Cookie::new(daily_id.to_string(), me.to_string().to_owned()));
 
     daily.join(me).await;
 
