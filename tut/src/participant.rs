@@ -9,3 +9,9 @@ impl ParticipantId {
         Self(uuid::Uuid::new_v4())
     }
 }
+
+impl From<&str> for ParticipantId {
+    fn from(value: &str) -> Self {
+        Self(value.parse().unwrap())
+    }
+}

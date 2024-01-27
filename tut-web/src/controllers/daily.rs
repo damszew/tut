@@ -43,6 +43,26 @@ pub async fn join(
     (jar, Redirect::to(&format!("/daily/{daily_id}")))
 }
 
+pub async fn next_step(
+    Path(daily_id): Path<DailyId>,
+    State(app_state): State<AppState>,
+    jar: CookieJar,
+) -> Response {
+    let daily = app_state.daily_router.get(&daily_id).await;
+    let cookie = jar.get(&daily_id.to_string());
+
+    match (daily, cookie) {
+        (Some(daily), Some(cookie)) => {
+            let me = cookie.value().into();
+            daily.ready_for_next_step(me).await;
+            ().into_response()
+        }
+
+        // TODO: Display error about what happened
+        (_, _) => Redirect::to("/").into_response(),
+    }
+}
+
 // TODO: Determine if participant is connected
 
 pub async fn room(
