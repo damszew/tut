@@ -1392,17 +1392,6 @@ dependencies = [
 name = "tut"
 version = "0.1.0"
 dependencies = [
- "derive_more",
- "serde",
- "tokio",
- "tracing",
- "uuid",
-]
-
-[[package]]
-name = "tut-web"
-version = "0.1.0"
-dependencies = [
  "anyhow",
  "axum",
  "axum-extra",
@@ -1413,7 +1402,18 @@ dependencies = [
  "tower-http",
  "tracing",
  "tracing-subscriber",
- "tut",
+ "tut-core",
+]
+
+[[package]]
+name = "tut-core"
+version = "0.0.0"
+dependencies = [
+ "derive_more",
+ "serde",
+ "tokio",
+ "tracing",
+ "uuid",
 ]
 
 [[package]]

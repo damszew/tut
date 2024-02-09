@@ -1,11 +1,11 @@
 use maud::Markup;
-use tut::daily::{DailyId, DailyState};
+use tut_core::daily::{DailyId, DailyState};
 
 pub fn html(daily_id: DailyId, state: &DailyState) -> Markup {
     let current_step = match state.step {
-        tut::daily::DailyStep::Waiting => "Waiting",
-        tut::daily::DailyStep::Started => "Started",
-        tut::daily::DailyStep::Finished => "Finished",
+        tut_core::daily::DailyStep::Waiting => "Waiting",
+        tut_core::daily::DailyStep::Started => "Started",
+        tut_core::daily::DailyStep::Finished => "Finished",
     };
 
     maud::html! {

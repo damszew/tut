@@ -46,16 +46,14 @@
         src = craneLib.cleanCargoSource ./.;
 
         commonArgs = {
-          pname = "tut-workspace";
-
           inherit src buildInputs nativeBuildInputs;
         };
 
-        cargoArtifacts = craneLib.buildDepsOnly (commonArgs // {
-          pname = "tut-web";
-        });
+        cargoArtifacts = craneLib.buildDepsOnly commonArgs;
 
-        fmt = craneLib.cargoFmt commonArgs;
+        fmt = craneLib.cargoFmt {
+          inherit src;
+        };
 
         clippy = craneLib.cargoClippy (commonArgs // {
           inherit cargoArtifacts;

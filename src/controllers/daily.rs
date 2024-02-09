@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use tut::{daily::DailyId, participant::ParticipantId};
+use tut_core::{daily::DailyId, participant::ParticipantId};
 
 use axum::{
     extract::{Path, State},

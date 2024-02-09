@@ -1,5 +1,5 @@
 use maud::Markup;
-use tut::daily::DailyId;
+use tut_core::daily::DailyId;
 
 use crate::views::layouts::root;
 

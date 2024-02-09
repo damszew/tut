@@ -1,7 +1,7 @@
 use clap::Parser;
 use tokio::net::TcpListener;
 use tracing_subscriber::{prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt};
-use tut::daily_router::DailyRouter;
+use tut_core::daily_router::DailyRouter;
 
 use crate::router::AppState;
 

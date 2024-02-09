@@ -1,7 +1,6 @@
 [package]
-name = "tut"
+name = "tut-core"
 edition = "2021"
-version.workspace = true
 
 [dependencies]
 derive_more = "0.99.17"
