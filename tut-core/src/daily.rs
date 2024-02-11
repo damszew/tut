@@ -12,7 +12,16 @@ pub enum Event {
 }
 
 #[derive(
-    Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord, serde::Deserialize, derive_more::Display,
+    Debug,
+    Clone,
+    Hash,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    serde::Deserialize,
+    derive_more::Display,
+    derive_more::From,
 )]
 pub struct DailyId(uuid::Uuid);
 

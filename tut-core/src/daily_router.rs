@@ -12,7 +12,14 @@ pub struct DailyRouter {
 impl DailyRouter {
     pub fn new() -> Self {
         Self {
-            dailies: Default::default(),
+            // TODO: Fake daily
+            dailies: Arc::new(RwLock::new(
+                [(
+                    uuid::uuid!("00000000-0000-0000-0000-000000000000").into(),
+                    Daily::new(),
+                )]
+                .into(),
+            )),
         }
     }
 

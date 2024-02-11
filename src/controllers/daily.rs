@@ -10,7 +10,7 @@ use axum_extra::extract::{cookie::Cookie, CookieJar};
 
 use crate::{
     router::AppState,
-    views::pages::{daily, join_daily, new_daily},
+    views::pages::{join_daily, new_daily, waiting_room},
 };
 
 pub async fn create_form() -> maud::Markup {
@@ -76,7 +76,7 @@ pub async fn room(
     match (daily, cookie) {
         (Some(daily), Some(_)) => {
             let daily_state = daily.state().await;
-            daily::page(daily_id, &daily_state).into_response()
+            waiting_room::page(daily_id, &daily_state).into_response()
         }
         (Some(_), None) => join_daily::page(daily_id).into_response(),
 
