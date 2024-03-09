@@ -51,9 +51,11 @@
 
         cargoArtifacts = craneLib.buildDepsOnly commonArgs;
 
-        fmt = craneLib.cargoFmt {
-          inherit src;
-        };
+        fmt = craneLib.cargoFmt
+          {
+            inherit src;
+            cargoExtraArgs = "--all";
+          };
 
         clippy = craneLib.cargoClippy (commonArgs // {
           inherit cargoArtifacts;
