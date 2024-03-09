@@ -19,12 +19,20 @@ pub async fn create_form() -> maud::Markup {
 
 pub async fn create(
     State(app_state): State<AppState>,
+    jar: CookieJar,
     Form(_): Form<HashMap<String, String>>,
-) -> Redirect {
+) -> (CookieJar, Redirect) {
     // TODO: Here should happen conversion from id to url-friendly id token
-    let token = app_state.daily_router.create_daily().await;
+    let daily_id = app_state.daily_router.create_daily().await;
 
-    Redirect::to(&format!("/daily/{token}"))
+    let daily = app_state.daily_router.get(&daily_id).await.unwrap();
+
+    let me = ParticipantId::random();
+    let jar = jar.add(Cookie::new(daily_id.to_string(), me.to_string().to_owned()));
+
+    daily.join(me).await;
+
+    (jar, Redirect::to(&format!("/daily/{daily_id}")))
 }
 
 pub async fn join(
