@@ -1,5 +1,14 @@
 #[derive(
-    Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord, serde::Deserialize, derive_more::Display,
+    Debug,
+    Clone,
+    Copy,
+    Hash,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    serde::Deserialize,
+    derive_more::Display,
 )]
 pub struct ParticipantId(uuid::Uuid);
 impl ParticipantId {
@@ -14,4 +23,11 @@ impl From<&str> for ParticipantId {
     fn from(value: &str) -> Self {
         Self(value.parse().unwrap())
     }
+}
+
+#[derive(Debug, Clone)]
+pub struct Participant {
+    pub id: ParticipantId,
+    pub name: String,
+    pub is_ready: bool, // TODO: enum?
 }

@@ -2,7 +2,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use tokio::sync::RwLock;
 
-use crate::participant::ParticipantId;
+use crate::participant::{Participant, ParticipantId};
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub enum Event {
@@ -49,7 +49,7 @@ pub enum DailyStep {
 
 #[derive(Debug, Clone, Default)]
 pub struct DailyState {
-    pub participants: HashMap<ParticipantId, bool>,
+    pub participants: HashMap<ParticipantId, Participant>,
     pub step: DailyStep,
 }
 
@@ -61,14 +61,17 @@ impl Daily {
     }
 
     #[tracing::instrument(skip_all, fields(participant_id))]
-    pub async fn join(&self, participant_id: ParticipantId) {
+    pub async fn join(&self, participant_id: ParticipantId, name: impl Into<String>) {
         tracing::info!("Joining daily");
 
-        self.state
-            .write()
-            .await
-            .participants
-            .insert(participant_id, false);
+        self.state.write().await.participants.insert(
+            participant_id,
+            Participant {
+                id: participant_id,
+                name: name.into(),
+                is_ready: false,
+            },
+        );
     }
 
     #[tracing::instrument(skip_all, fields(participant_id))]
@@ -76,9 +79,14 @@ impl Daily {
         tracing::info!("Participant is ready for next step");
 
         let mut state_lock = self.state.write().await;
-        state_lock.participants.insert(participant_id, true);
+        state_lock
+            .participants
+            .entry(participant_id)
+            .and_modify(|p| {
+                p.is_ready = true;
+            });
 
-        let are_everyone_ready = state_lock.participants.values().all(|is_ready| *is_ready);
+        let are_everyone_ready = state_lock.participants.values().all(|p| p.is_ready);
 
         if are_everyone_ready {
             tracing::info!(current = ?state_lock.step, "Going to next step");

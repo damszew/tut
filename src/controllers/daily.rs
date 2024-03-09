@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-use tut_core::{daily::DailyId, participant::ParticipantId};
+use tut_core::{daily::DailyId, participant::ParticipantId, waiting_room::WaitingRoom};
 
 use axum::{
     extract::{Path, State},
@@ -17,10 +16,15 @@ pub async fn create_form() -> maud::Markup {
     new_daily::page()
 }
 
+#[derive(Debug, serde::Deserialize)]
+pub struct JoinDailyReq {
+    name: String,
+}
+
 pub async fn create(
     State(app_state): State<AppState>,
     jar: CookieJar,
-    Form(_): Form<HashMap<String, String>>,
+    Form(req): Form<JoinDailyReq>,
 ) -> (CookieJar, Redirect) {
     // TODO: Here should happen conversion from id to url-friendly id token
     let daily_id = app_state.daily_router.create_daily().await;
@@ -30,7 +34,7 @@ pub async fn create(
     let me = ParticipantId::random();
     let jar = jar.add(Cookie::new(daily_id.to_string(), me.to_string().to_owned()));
 
-    daily.join(me).await;
+    daily.join(me, req.name).await;
 
     (jar, Redirect::to(&format!("/daily/{daily_id}")))
 }
@@ -39,14 +43,14 @@ pub async fn join(
     Path(daily_id): Path<DailyId>,
     State(app_state): State<AppState>,
     jar: CookieJar,
-    Form(_): Form<HashMap<String, String>>,
+    Form(req): Form<JoinDailyReq>,
 ) -> (CookieJar, Redirect) {
     let daily = app_state.daily_router.get(&daily_id).await.unwrap();
 
     let me = ParticipantId::random();
     let jar = jar.add(Cookie::new(daily_id.to_string(), me.to_string().to_owned()));
 
-    daily.join(me).await;
+    daily.join(me, req.name).await;
 
     (jar, Redirect::to(&format!("/daily/{daily_id}")))
 }
@@ -84,7 +88,13 @@ pub async fn room(
     match (daily, cookie) {
         (Some(daily), Some(_)) => {
             let daily_state = daily.state().await;
-            waiting_room::page(daily_id, &daily_state).into_response()
+            let waiting_room = WaitingRoom {
+                url: "http://localhost:8000".into(), // TODO: Extract from req
+                daily_id,
+                am_i_ready: false, // TODO
+                participants: daily_state.participants.into_values().collect(),
+            };
+            waiting_room::page(&waiting_room).into_response()
         }
         (Some(_), None) => join_daily::page(daily_id).into_response(),
 

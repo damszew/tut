@@ -1,7 +1,8 @@
 use maud::Markup;
 use tut_core::daily::{DailyId, DailyState};
 
-pub fn html(daily_id: DailyId, state: &DailyState) -> Markup {
+// TODO: Keep for now
+pub fn _html(daily_id: DailyId, state: &DailyState) -> Markup {
     let current_step = match state.step {
         tut_core::daily::DailyStep::Waiting => "Waiting",
         tut_core::daily::DailyStep::Started => "Started",

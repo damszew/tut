@@ -1,18 +1,10 @@
 use maud::Markup;
-use tut_core::daily::{DailyId, DailyState};
+use tut_core::waiting_room::WaitingRoom;
 
-use crate::views::{components::daily_state, layouts::root};
+use crate::views::layouts::root;
 
-pub fn page(daily_id: DailyId, state: &DailyState) -> Markup {
-    // TODO: pass it
-    let url = format!("http://localhost:8000/daily/{daily_id}");
-    let is_ready = false;
-    let participants = vec![
-        ("Perico", true),
-        ("Rita", true),
-        ("Jan", false),
-        ("Anna", false),
-    ];
+pub fn page(state: &WaitingRoom) -> Markup {
+    let url = format!("{}/daily/{}", state.url, state.daily_id);
 
     let body = maud::html! {
         header {
@@ -42,14 +34,14 @@ pub fn page(daily_id: DailyId, state: &DailyState) -> Markup {
                 div ."flex flex-col rounded-box gap-4 p-4 bg-base-300" {
                     p ."text-lg" { "Participants" }
                     div #participants ."flex flex-col gap-2 max-w-fit px-4" {
-                        @for participant in &participants {
+                        @for participant in &state.participants {
                             div ."flex items-center rounded-badge bg-base-100"{
-                                div  #(participant.0) .{"avatar placeholder flex " @if participant.1 {"online"}} {
+                                div  #(participant.id) .{"avatar placeholder flex " @if participant.is_ready {"online"}} {
                                     div ."bg-neutral text-neutral-content rounded-full w-12" {
-                                        span {(participant.0.chars().take(2).collect::<String>())}
+                                        span {(participant.name.chars().take(2).collect::<String>())}
                                     }
                                 }
-                                p ."px-4" { (participant.0) }
+                                p ."px-4" { (participant.name) }
                             }
                         }
                     }
@@ -57,10 +49,10 @@ pub fn page(daily_id: DailyId, state: &DailyState) -> Markup {
             }
 
             section ."p-8 rounded-box shadow-xl bg-base-200" {
-                @if !is_ready {
+                @if !state.am_i_ready {
                     button
                         ."btn btn-success btn-block"
-                        hx-put={"/daily/" (daily_id) "?ready=true"}
+                        hx-put={"/daily/" (state.daily_id) "?ready=true"}
                         // TODO: Swap toggle
                     {
                         "I'm so ready"
@@ -68,7 +60,7 @@ pub fn page(daily_id: DailyId, state: &DailyState) -> Markup {
                 } @else {
                     button
                         ."btn btn-error btn-block"
-                        hx-put={"/daily/" (daily_id) "?ready=false"}
+                        hx-put={"/daily/" (state.daily_id) "?ready=false"}
                         // TODO: Swap toggle
                     {
                         "Wait! I was not ready"
