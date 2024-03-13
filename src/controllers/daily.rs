@@ -2,6 +2,7 @@ use tut_core::{daily::DailyId, participant::Participant, waiting_room::WaitingRo
 
 use axum::{
     extract::{Path, State},
+    http::StatusCode,
     response::{IntoResponse, Redirect, Response},
     Form,
 };
@@ -115,4 +116,27 @@ pub async fn room(
         // TODO: Display error about what happened
         (None, _) => Redirect::to("/").into_response(),
     }
+}
+
+#[derive(Debug, serde::Deserialize)]
+pub struct ReadyDailyReq {
+    ready: bool,
+}
+
+pub async fn ready(
+    Path(daily_id): Path<DailyId>,
+    State(app_state): State<AppState>,
+    jar: CookieJar,
+    Form(req): Form<ReadyDailyReq>,
+) -> StatusCode {
+    let daily = app_state.daily_router.get(&daily_id).await.unwrap();
+
+    let cookie = jar.get(&daily_id.to_string()).unwrap();
+    let participant_id = cookie.value().into();
+
+    if req.ready {
+        daily.ready_for_next_step(participant_id).await;
+    }
+
+    StatusCode::OK
 }

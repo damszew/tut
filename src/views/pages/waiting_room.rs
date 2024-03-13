@@ -52,16 +52,18 @@ pub fn page(state: &WaitingRoom) -> Markup {
                 @if !state.me.is_ready {
                     button
                         ."btn btn-success btn-block"
-                        hx-put={"/daily/" (state.daily_id) "?ready=true"}
-                        // TODO: Swap toggle
+                        hx-put={"/daily/" (state.daily_id) }
+                        hx-vals={"{\"ready\": true}"}
+                        hx-swap="none"
                     {
                         "I'm so ready"
                     }
                 } @else {
                     button
                         ."btn btn-error btn-block"
-                        hx-put={"/daily/" (state.daily_id) "?ready=false"}
-                        // TODO: Swap toggle
+                        hx-put={"/daily/" (state.daily_id) }
+                        hx-vals={"{\"ready\": false}"}
+                        hx-swap="none"
                     {
                         "Wait! I was not ready"
                     }
