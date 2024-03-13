@@ -49,7 +49,7 @@ pub fn page(state: &WaitingRoom) -> Markup {
             }
 
             section ."p-8 rounded-box shadow-xl bg-base-200" {
-                @if !state.am_i_ready {
+                @if !state.me.is_ready {
                     button
                         ."btn btn-success btn-block"
                         hx-put={"/daily/" (state.daily_id) "?ready=true"}

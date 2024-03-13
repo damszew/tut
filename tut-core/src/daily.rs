@@ -60,21 +60,16 @@ impl Daily {
         }
     }
 
-    #[tracing::instrument(skip_all, fields(participant_id))]
-    pub async fn join(&self, participant_id: ParticipantId, name: impl Into<String>) {
+    pub async fn join(&self, participant: Participant) {
         tracing::info!("Joining daily");
 
-        self.state.write().await.participants.insert(
-            participant_id,
-            Participant {
-                id: participant_id,
-                name: name.into(),
-                is_ready: false,
-            },
-        );
+        self.state
+            .write()
+            .await
+            .participants
+            .insert(participant.id, participant);
     }
 
-    #[tracing::instrument(skip_all, fields(participant_id))]
     pub async fn ready_for_next_step(&self, participant_id: ParticipantId) {
         tracing::info!("Participant is ready for next step");
 
@@ -98,7 +93,6 @@ impl Daily {
         }
     }
 
-    #[tracing::instrument(skip_all, fields(participant_id))]
     pub async fn leave(&self, participant_id: ParticipantId) {
         tracing::info!("Leaving daily");
 

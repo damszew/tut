@@ -12,9 +12,7 @@
 )]
 pub struct ParticipantId(uuid::Uuid);
 impl ParticipantId {
-    pub fn random() -> Self {
-        // TODO: probably daily should create it
-
+    fn random() -> Self {
         Self(uuid::Uuid::new_v4())
     }
 }
@@ -27,7 +25,17 @@ impl From<&str> for ParticipantId {
 
 #[derive(Debug, Clone)]
 pub struct Participant {
-    pub id: ParticipantId,
+    pub id: ParticipantId, // TODO: getters?
     pub name: String,
     pub is_ready: bool, // TODO: enum?
+}
+
+impl Participant {
+    pub fn new(name: impl Into<String>) -> Self {
+        Self {
+            id: ParticipantId::random(),
+            name: name.into(),
+            is_ready: false,
+        }
+    }
 }

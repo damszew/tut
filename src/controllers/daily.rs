@@ -1,4 +1,4 @@
-use tut_core::{daily::DailyId, participant::ParticipantId, waiting_room::WaitingRoom};
+use tut_core::{daily::DailyId, participant::Participant, waiting_room::WaitingRoom};
 
 use axum::{
     extract::{Path, State},
@@ -31,10 +31,13 @@ pub async fn create(
 
     let daily = app_state.daily_router.get(&daily_id).await.unwrap();
 
-    let me = ParticipantId::random();
-    let jar = jar.add(Cookie::new(daily_id.to_string(), me.to_string().to_owned()));
+    let me = Participant::new(req.name);
+    let jar = jar.add(Cookie::new(
+        daily_id.to_string(),
+        me.id.to_string().to_owned(),
+    ));
 
-    daily.join(me, req.name).await;
+    daily.join(me).await;
 
     (jar, Redirect::to(&format!("/daily/{daily_id}")))
 }
@@ -47,10 +50,13 @@ pub async fn join(
 ) -> (CookieJar, Redirect) {
     let daily = app_state.daily_router.get(&daily_id).await.unwrap();
 
-    let me = ParticipantId::random();
-    let jar = jar.add(Cookie::new(daily_id.to_string(), me.to_string().to_owned()));
+    let me = Participant::new(req.name);
+    let jar = jar.add(Cookie::new(
+        daily_id.to_string(),
+        me.id.to_string().to_owned(),
+    ));
 
-    daily.join(me, req.name).await;
+    daily.join(me).await;
 
     (jar, Redirect::to(&format!("/daily/{daily_id}")))
 }
@@ -86,12 +92,20 @@ pub async fn room(
     let cookie = jar.get(&daily_id.to_string());
 
     match (daily, cookie) {
-        (Some(daily), Some(_)) => {
+        (Some(daily), Some(cookie)) => {
             let daily_state = daily.state().await;
+
+            let my_id = cookie.value().into();
+            let me = daily_state
+                .participants
+                .get(&my_id)
+                .expect("Not in daily")
+                .clone();
+
             let waiting_room = WaitingRoom {
                 url: "http://localhost:8000".into(), // TODO: Extract from req
                 daily_id,
-                am_i_ready: false, // TODO
+                me,
                 participants: daily_state.participants.into_values().collect(),
             };
             waiting_room::page(&waiting_room).into_response()
