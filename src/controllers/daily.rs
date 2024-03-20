@@ -1,6 +1,6 @@
 use tut_core::{
     daily::{DailyId, DailyState, Event},
-    participant::Participant,
+    participant::{Participant, ParticipantId},
 };
 
 use axum::{
@@ -13,10 +13,7 @@ use axum_extra::extract::{cookie::Cookie, CookieJar};
 
 use crate::{
     router::AppState,
-    views::pages::{
-        join_daily, new_daily,
-        waiting_room::{self, WaitingRoomView},
-    },
+    views::pages::{join_daily, new_daily, waiting_room::WaitingRoomView},
 };
 
 pub async fn create_form() -> maud::Markup {
@@ -76,23 +73,22 @@ pub async fn room(
     State(app_state): State<AppState>,
 ) -> Response {
     let daily = app_state.daily_router.get(&daily_id).await;
-    let cookie = jar.get(&daily_id.to_string());
+    let my_id = read_participant_id(jar, &daily_id);
 
-    match (daily, cookie) {
-        (Some(daily), Some(cookie)) => {
+    match (daily, my_id) {
+        (Some(daily), Some(my_id)) => {
             let daily_state = daily.state().await;
-            let my_id = cookie.value().into();
 
             match daily_state {
                 DailyState::WaitingRoom(room) => {
-                    let waiting_room = WaitingRoomView {
+                    WaitingRoomView {
                         url: "http://localhost:8000".into(), // TODO: Extract from req
                         daily_id,
                         me: my_id,
-                        participants: room.participants,
-                        ready_participants: room.ready_participants,
-                    };
-                    waiting_room::page(&waiting_room).into_response()
+                        room,
+                    }
+                    .page()
+                    .into_response()
                 }
 
                 _ => todo!(),
@@ -116,14 +112,21 @@ pub async fn ready(
     jar: CookieJar,
     Form(req): Form<ReadyDailyReq>,
 ) -> StatusCode {
+    let participant_id = read_participant_id(jar, &daily_id).unwrap();
+
+    let event = if req.ready {
+        Event::Ready(participant_id)
+    } else {
+        Event::NotReady(participant_id)
+    };
+
     let daily = app_state.daily_router.get(&daily_id).await.unwrap();
-
-    let cookie = jar.get(&daily_id.to_string()).unwrap();
-    let participant_id = cookie.value().into();
-
-    if req.ready {
-        daily.event(Event::Ready(participant_id)).await.unwrap();
-    }
+    daily.event(event).await.unwrap();
 
     StatusCode::OK
+}
+
+fn read_participant_id(jar: CookieJar, daily_id: &DailyId) -> Option<ParticipantId> {
+    jar.get(&daily_id.to_string())
+        .map(|cookie| cookie.value().into())
 }

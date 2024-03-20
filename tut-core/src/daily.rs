@@ -71,6 +71,7 @@ pub enum DailyState {
 pub enum Event {
     Join(Participant),
     Ready(ParticipantId),
+    NotReady(ParticipantId),
 }
 
 impl DailyState {
@@ -82,8 +83,13 @@ impl DailyState {
 
                 Ok(Self::WaitingRoom(waiting_room))
             }
-            (Self::WaitingRoom(mut waiting_room), Event::Ready(ready_guy)) => {
-                waiting_room.mark_as_ready(ready_guy);
+            (Self::WaitingRoom(mut waiting_room), Event::Ready(guy)) => {
+                waiting_room.mark_as_ready(guy);
+
+                Ok(Self::WaitingRoom(waiting_room))
+            }
+            (Self::WaitingRoom(mut waiting_room), Event::NotReady(guy)) => {
+                waiting_room.unmark_as_ready(guy);
 
                 Ok(Self::WaitingRoom(waiting_room))
             }

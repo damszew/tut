@@ -14,4 +14,10 @@ impl WaitingRoom {
     pub fn mark_as_ready(&mut self, guy: ParticipantId) {
         self.ready_participants.push(guy);
     }
+
+    pub fn unmark_as_ready(&mut self, guy: ParticipantId) {
+        if let Some(index) = self.ready_participants.iter().position(|id| *id == guy) {
+            self.ready_participants.remove(index);
+        }
+    }
 }
