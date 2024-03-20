@@ -1,4 +1,7 @@
-use tut_core::{daily::DailyId, participant::Participant, waiting_room::WaitingRoom};
+use tut_core::{
+    daily::{DailyId, DailyState, Event},
+    participant::Participant,
+};
 
 use axum::{
     extract::{Path, State},
@@ -10,7 +13,10 @@ use axum_extra::extract::{cookie::Cookie, CookieJar};
 
 use crate::{
     router::AppState,
-    views::pages::{join_daily, new_daily, waiting_room},
+    views::pages::{
+        join_daily, new_daily,
+        waiting_room::{self, WaitingRoomView},
+    },
 };
 
 pub async fn create_form() -> maud::Markup {
@@ -38,7 +44,7 @@ pub async fn create(
         me.id.to_string().to_owned(),
     ));
 
-    daily.join(me).await;
+    daily.event(Event::Join(me)).await.unwrap();
 
     (jar, Redirect::to(&format!("/daily/{daily_id}")))
 }
@@ -57,29 +63,9 @@ pub async fn join(
         me.id.to_string().to_owned(),
     ));
 
-    daily.join(me).await;
+    daily.event(Event::Join(me)).await.unwrap();
 
     (jar, Redirect::to(&format!("/daily/{daily_id}")))
-}
-
-pub async fn next_step(
-    Path(daily_id): Path<DailyId>,
-    State(app_state): State<AppState>,
-    jar: CookieJar,
-) -> Response {
-    let daily = app_state.daily_router.get(&daily_id).await;
-    let cookie = jar.get(&daily_id.to_string());
-
-    match (daily, cookie) {
-        (Some(daily), Some(cookie)) => {
-            let me = cookie.value().into();
-            daily.ready_for_next_step(me).await;
-            ().into_response()
-        }
-
-        // TODO: Display error about what happened
-        (_, _) => Redirect::to("/").into_response(),
-    }
 }
 
 // TODO: Determine if participant is connected
@@ -95,21 +81,22 @@ pub async fn room(
     match (daily, cookie) {
         (Some(daily), Some(cookie)) => {
             let daily_state = daily.state().await;
-
             let my_id = cookie.value().into();
-            let me = daily_state
-                .participants
-                .get(&my_id)
-                .expect("Not in daily")
-                .clone();
 
-            let waiting_room = WaitingRoom {
-                url: "http://localhost:8000".into(), // TODO: Extract from req
-                daily_id,
-                me,
-                participants: daily_state.participants.into_values().collect(),
-            };
-            waiting_room::page(&waiting_room).into_response()
+            match daily_state {
+                DailyState::WaitingRoom(room) => {
+                    let waiting_room = WaitingRoomView {
+                        url: "http://localhost:8000".into(), // TODO: Extract from req
+                        daily_id,
+                        me: my_id,
+                        participants: room.participants,
+                        ready_participants: room.ready_participants,
+                    };
+                    waiting_room::page(&waiting_room).into_response()
+                }
+
+                _ => todo!(),
+            }
         }
         (Some(_), None) => join_daily::page(daily_id).into_response(),
 
@@ -135,7 +122,7 @@ pub async fn ready(
     let participant_id = cookie.value().into();
 
     if req.ready {
-        daily.ready_for_next_step(participant_id).await;
+        daily.event(Event::Ready(participant_id)).await.unwrap();
     }
 
     StatusCode::OK

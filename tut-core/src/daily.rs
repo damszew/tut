@@ -1,15 +1,11 @@
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 
 use tokio::sync::RwLock;
 
-use crate::participant::{Participant, ParticipantId};
-
-#[derive(Debug, Clone, serde::Deserialize)]
-pub enum Event {
-    NewPersonJoined(ParticipantId),
-    RaisedHand,
-    PersonLeft(ParticipantId),
-}
+use crate::{
+    participant::{Participant, ParticipantId},
+    waiting_room::WaitingRoom,
+};
 
 #[derive(
     Debug,
@@ -38,21 +34,6 @@ pub struct Daily {
     state: Arc<RwLock<DailyState>>,
 }
 
-#[derive(Debug, Clone, Default)]
-
-pub enum DailyStep {
-    #[default]
-    Waiting,
-    Started,
-    Finished,
-}
-
-#[derive(Debug, Clone, Default)]
-pub struct DailyState {
-    pub participants: HashMap<ParticipantId, Participant>,
-    pub step: DailyStep,
-}
-
 impl Daily {
     pub fn new() -> Self {
         Self {
@@ -60,50 +41,60 @@ impl Daily {
         }
     }
 
-    pub async fn join(&self, participant: Participant) {
-        tracing::info!("Joining daily");
-
-        self.state
-            .write()
-            .await
-            .participants
-            .insert(participant.id, participant);
-    }
-
-    pub async fn ready_for_next_step(&self, participant_id: ParticipantId) {
-        tracing::info!("Participant is ready for next step");
+    pub async fn event(self, event: Event) -> Result<(), String> {
+        tracing::info!("Dispatching event: {event:?}"); // TODO: Nicer log/display
 
         let mut state_lock = self.state.write().await;
-        state_lock
-            .participants
-            .entry(participant_id)
-            .and_modify(|p| {
-                p.is_ready = true;
-            });
+        let new_state = state_lock.clone().event(event)?;
 
-        let are_everyone_ready = state_lock.participants.values().all(|p| p.is_ready);
+        *state_lock = new_state;
 
-        if are_everyone_ready {
-            tracing::info!(current = ?state_lock.step, "Going to next step");
-            state_lock.step = match state_lock.step {
-                DailyStep::Waiting => DailyStep::Started,
-                DailyStep::Started => DailyStep::Finished,
-                DailyStep::Finished => DailyStep::Finished,
-            };
-        }
-    }
-
-    pub async fn leave(&self, participant_id: ParticipantId) {
-        tracing::info!("Leaving daily");
-
-        self.state
-            .write()
-            .await
-            .participants
-            .remove(&participant_id);
+        Ok(())
     }
 
     pub async fn state(&self) -> DailyState {
         self.state.read().await.clone()
+    }
+}
+
+#[derive(Debug, Clone)]
+
+pub enum DailyState {
+    WaitingRoom(WaitingRoom),
+    IceBreakerQuestion(()),
+    IceBreakerAnswer(()),
+    AmIBlocked(()),
+    Finished(()),
+}
+
+#[derive(Debug, Clone)]
+pub enum Event {
+    Join(Participant),
+    Ready(ParticipantId),
+}
+
+impl DailyState {
+    // TODO: Error type
+    pub fn event(self, event: Event) -> Result<Self, String> {
+        match (self, event) {
+            (Self::WaitingRoom(mut waiting_room), Event::Join(new_guy)) => {
+                waiting_room.join(new_guy);
+
+                Ok(Self::WaitingRoom(waiting_room))
+            }
+            (Self::WaitingRoom(mut waiting_room), Event::Ready(ready_guy)) => {
+                waiting_room.mark_as_ready(ready_guy);
+
+                Ok(Self::WaitingRoom(waiting_room))
+            }
+
+            (_, _) => Err("Invalid state".into()),
+        }
+    }
+}
+
+impl Default for DailyState {
+    fn default() -> Self {
+        Self::WaitingRoom(WaitingRoom::default())
     }
 }

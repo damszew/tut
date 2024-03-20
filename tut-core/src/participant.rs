@@ -27,7 +27,6 @@ impl From<&str> for ParticipantId {
 pub struct Participant {
     pub id: ParticipantId, // TODO: getters?
     pub name: String,
-    pub is_ready: bool, // TODO: enum?
 }
 
 impl Participant {
@@ -35,7 +34,6 @@ impl Participant {
         Self {
             id: ParticipantId::random(),
             name: name.into(),
-            is_ready: false,
         }
     }
 }

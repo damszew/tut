@@ -1,10 +1,22 @@
 use maud::Markup;
-use tut_core::waiting_room::WaitingRoom;
+use tut_core::{
+    daily::DailyId,
+    participant::{Participant, ParticipantId},
+};
 
 use crate::views::layouts::root;
 
-pub fn page(state: &WaitingRoom) -> Markup {
+pub struct WaitingRoomView {
+    pub url: String,
+    pub daily_id: DailyId,
+    pub me: ParticipantId,
+    pub participants: Vec<Participant>,
+    pub ready_participants: Vec<ParticipantId>,
+}
+
+pub fn page(state: &WaitingRoomView) -> Markup {
     let url = format!("{}/daily/{}", state.url, state.daily_id);
+    let is_ready = |id| state.ready_participants.contains(&id);
 
     let body = maud::html! {
         header {
@@ -36,7 +48,7 @@ pub fn page(state: &WaitingRoom) -> Markup {
                     div #participants ."flex flex-col gap-2 max-w-fit px-4" {
                         @for participant in &state.participants {
                             div ."flex items-center rounded-badge bg-base-100"{
-                                div  #(participant.id) .{"avatar placeholder flex " @if participant.is_ready {"online"}} {
+                                div  #(participant.id) .{"avatar placeholder flex " @if is_ready(participant.id) {"online"}} {
                                     div ."bg-neutral text-neutral-content rounded-full w-12" {
                                         span {(participant.name.chars().take(2).collect::<String>())}
                                     }
@@ -49,7 +61,7 @@ pub fn page(state: &WaitingRoom) -> Markup {
             }
 
             section ."p-8 rounded-box shadow-xl bg-base-200" {
-                @if !state.me.is_ready {
+                @if !is_ready(state.me) {
                     button
                         ."btn btn-success btn-block"
                         hx-put={"/daily/" (state.daily_id) }
